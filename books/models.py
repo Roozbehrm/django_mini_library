@@ -1,5 +1,5 @@
 from django.db import models
-from django .conf import settings
+from django.conf import settings
 
 
 
@@ -29,7 +29,7 @@ class Publisher(models.Model):
 
 
 
-class Books(models.Model):
+class Book(models.Model):
     LANGUAGE_CHOICES = [
         ("fa", "فارسی"),
         ("en", "انگلیسی"),
@@ -59,7 +59,7 @@ class Books(models.Model):
 
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    book = models.ForeignKey(Books, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
