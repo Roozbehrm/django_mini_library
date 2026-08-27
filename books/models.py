@@ -44,7 +44,7 @@ class Book(models.Model):
     publisher = models.ForeignKey(Publisher, on_delete=models.PROTECT)
     description = models.TextField()
     language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.PositiveIntegerField()
     pages = models.PositiveSmallIntegerField()
     isbn = models.CharField(max_length=20, blank=True, unique=True)
     publish_date = models.DateField()
