@@ -3,10 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-
-from .forms import AuthorForm, BookForm, CategoryForm, PublisherForm
-from .models import Book
-from .selectors import filter_books
+from books.forms import AuthorForm, BookForm, CategoryForm, PublisherForm
+from books.models import Book, Favorite
+from books.selectors import filter_books
+from books.services import toggle_favorite
 
 
 def book_list(request):
@@ -75,6 +75,8 @@ def book_delete(request, pk):
         return redirect("books:book_list")
     return render(request, "books/book_confirm_delete.html", {"book": book})
 
+
+
 def book_detail(request, pk):
 
     book = get_object_or_404(Book, pk=pk)
@@ -85,6 +87,8 @@ def book_detail(request, pk):
         "books/book_detail.html",
         {"book": book, "other_books_by_author": other_books_by_author},
     )
+
+
 
 def author_add(request):
 
@@ -99,7 +103,10 @@ def author_add(request):
 
     return render(request, "books/simple_form.html", {"form": form, "title": "افزودن نویسنده جدید"})
 
+
+
 def category_add(request):
+
     if request.method == "POST":
         form = CategoryForm(request.POST)
         if form.is_valid():
@@ -112,7 +119,9 @@ def category_add(request):
     return render(request, "books/simple_form.html", {"form": form, "title": "افزودن دسته‌بندی جدید"})
 
 
+
 def publisher_add(request):
+
     if request.method == "POST":
         form = PublisherForm(request.POST)
         if form.is_valid():
@@ -123,7 +132,10 @@ def publisher_add(request):
         form = PublisherForm()
     return render(request, "books/simple_form.html", {"form": form, "title": "افزودن ناشر جدید"})
 
+
+
 def book_delete_filtered(request):
+
     if request.method == "POST":
         books, _ = filter_books(request.GET)
         count = books.count()
@@ -135,11 +147,29 @@ def book_delete_filtered(request):
     return redirect("books:book_list")
 
 
-#@loginrequired
-def favorite_toggle(request, pk):
-    pass
 
-#@loginrequired
+
+@login_required
+def favorite_toggle(request, pk):
+
+    book = get_object_or_404(Book, pk=pk)
+    added = toggle_favorite(request.user, book)
+    if added:
+        messages.success(request, f'کتاب «{book.title}» به علاقه‌مندی‌ها اضافه شد.')
+    else:
+        messages.info(request, f'کتاب «{book.title}» از علاقه‌مندی‌ها حذف شد.')
+    next_url = request.POST.get("next") or request.GET.get("next") or reverse("books:book_list")
+    return redirect(next_url)
+
+
+
+@login_required
 def favorite_list(request):
-    pass
+
+    favorites = (
+        Favorite.objects.filter(user=request.user)
+        .select_related("book", "book__category")
+        .order_by("-added_at")
+    )
+    return render(request, "books/favorites.html", {"favorites": favorites})
 
