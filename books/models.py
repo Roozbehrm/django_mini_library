@@ -23,6 +23,7 @@ class Category(models.Model):
 
 class Publisher(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    address = models.CharField(max_length=255, blank=True, default="")
 
     def __str__(self):
         return self.name
