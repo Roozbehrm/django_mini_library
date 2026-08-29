@@ -94,14 +94,15 @@ def book_delete(request, pk):
 
 
 def book_detail(request, pk):
-
     book = get_object_or_404(Book, pk=pk)
+    is_favorite = False
+    if request.user.is_authenticated:
+        is_favorite = Favorite.objects.filter(user=request.user, book=book).exists()
     other_books_by_author = Book.objects.filter(author=book.author).exclude(pk=book.pk)
-
     return render(
         request,
         "books/book_detail.html",
-        {"book": book, "other_books_by_author": other_books_by_author},
+        {"book": book, "is_favorite": is_favorite, "other_books_by_author": other_books_by_author},
     )
 
 

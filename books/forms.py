@@ -25,6 +25,7 @@ class BookForm(forms.ModelForm):
             "isbn": forms.TextInput(attrs={"class": "form-control", "placeholder": "مثلاً 9786001824970"}),
             "language": forms.Select(attrs={"class": "form-select"}),
             "price": forms.NumberInput(attrs={"class": "form-control", "placeholder": "قیمت به تومان"}),
+            "pages": forms.NumberInput(attrs={"class": "form-control", "placeholder": "تعداد صفحه"}),
             "publish_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "category": forms.Select(attrs={"class": "form-select"}),
             "description": forms.Textarea(
