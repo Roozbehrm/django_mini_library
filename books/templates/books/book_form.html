@@ -39,7 +39,59 @@
     </div>
 </div>
 
+{% include "books/_quick_add_modal.html" with modal_id="quickAddAuthorModal" title="افزودن نویسنده جدید" post_url_name="books:author_add" form=author_form select_name="author" %}
+{% include "books/_quick_add_modal.html" with modal_id="quickAddPublisherModal" title="افزودن ناشر جدید" post_url_name="books:publisher_add" form=publisher_form select_name="publisher" %}
+{% include "books/_quick_add_modal.html" with modal_id="quickAddCategoryModal" title="افزودن دسته‌بندی جدید" post_url_name="books:category_add" form=category_form select_name="category" %}
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.quick-add-form').forEach(function (formEl) {
+        formEl.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const errorBox = formEl.querySelector('.quick-add-errors');
+            errorBox.classList.add('d-none');
+            errorBox.textContent = '';
+
+            fetch(formEl.action, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: new FormData(formEl),
+            })
+            .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+            .then(function (result) {
+                if (!result.ok) {
+                    const messages = Object.values(result.data.errors || {}).flat().join(' - ');
+                    errorBox.textContent = messages || 'خطایی رخ داد، دوباره تلاش کنید.';
+                    errorBox.classList.remove('d-none');
+                    return;
+                }
+                const selectName = formEl.dataset.selectName;
+                const select = document.querySelector('select[name="' + selectName + '"]');
+                if (select) {
+                    if (select.choicesInstance) {
+
+                        select.choicesInstance.setChoices(
+                            [{ value: String(result.data.id), label: result.data.name, selected: true }],
+                            'value', 'label', false
+                        );
+                    } else {
+
+                        const option = new Option(result.data.name, result.data.id, true, true);
+                        select.appendChild(option);
+                    }
+                }
+                formEl.reset();
+                const modalEl = formEl.closest('.modal');
+                bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            })
+            .catch(function () {
+                errorBox.textContent = 'ارتباط با سرور برقرار نشد.';
+                errorBox.classList.remove('d-none');
+            });
+        });
+    });
+});
+</script>
 
 
 {% endblock %}
