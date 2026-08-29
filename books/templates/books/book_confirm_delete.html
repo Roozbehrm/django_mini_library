@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}حذف کتاب{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card p-4 text-center">
+            <h4 class="mb-3">حذف کتاب</h4>
+            <p>آیا مطمئن هستید می‌خواهید کتاب «<strong>{{ book.title }}</strong>» اثر {{ book.author }} را حذف کنید؟</p>
+            <form method="post" class="d-flex justify-content-center gap-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">بله، حذف شود</button>
+                <a href="{% url 'books:book_list' %}" class="btn btn-outline-secondary">انصراف</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

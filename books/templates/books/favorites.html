@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}علاقه‌مندی‌های من{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">علاقه‌مندی‌های من <span class="badge bg-secondary">{{ favorites.count }}</span></h3>
+
+{% if favorites %}
+<div class="catalog-grid">
+    {% for fav in favorites %}
+        <article class="catalog-card {% cycle 'spine-1' 'spine-2' 'spine-3' 'spine-4' 'spine-5' %}">
+            <h3 class="catalog-title">
+                <a href="{% url 'books:book_detail' fav.book.pk %}">{{ fav.book.title }}</a>
+            </h3>
+            <div class="catalog-meta">{{ fav.book.author }} — ناشر: {{ fav.book.publisher }}</div>
+            {% if fav.book.category %}
+                <div class="catalog-tags">
+                    <span class="badge bg-info text-dark">{{ fav.book.category.name }}</span>
+                </div>
+            {% endif %}
+            <hr class="catalog-rule">
+            <div class="catalog-foot">
+                <span class="badge bg-success">{{ fav.book.price }} تومان</span>
+                <span>{{ fav.added_at|date:"Y/m/d" }}</span>
+            </div>
+            <div class="catalog-actions">
+                <a href="{% url 'books:book_detail' fav.book.pk %}" class="btn btn-sm btn-outline-primary">مشاهده</a>
+                <form method="post" action="{% url 'books:favorite_toggle' fav.book.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+                </form>
+            </div>
+        </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">هنوز کتابی به علاقه‌مندی‌های خود اضافه نکرده‌اید.</div>
+{% endif %}
+{% endblock %}
