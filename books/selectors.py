@@ -1,7 +1,6 @@
 from django.db.models import Q
-
-from .forms import BookFilterForm
-from .models import Book
+from books.forms import BookFilterForm
+from books.models import Book, Author, Publisher, Category
 
 
 def filter_books(query_params):
@@ -43,3 +42,15 @@ def filter_books(query_params):
         books = books.order_by(sort)
 
     return books, form
+
+
+def list_authors():
+    return Author.objects.annotate(book_count=Count("books")).order_by("name")
+
+
+def list_publishers():
+    return Publisher.objects.annotate(book_count=Count("books")).order_by("name")
+
+
+def list_categories():
+    return Category.objects.annotate(book_count=Count("books")).order_by("name")

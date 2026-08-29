@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from books.forms import AuthorForm, BookForm, CategoryForm, PublisherForm
 from books.models import Book, Favorite
-from books.selectors import filter_books
-from books.services import toggle_favorite
+from books.selectors import filter_books, list_authors, list_categories, list_publishers
+from books.services import delete_author, delete_category, delete_publisher, toggle_favorite
 
 
 def book_list(request):
@@ -27,8 +27,9 @@ def book_list(request):
     }
     return render(request, "books/book_list.html", context)
 
-def book_add(request):
 
+
+def book_add(request):
     if request.method == "POST":
         form = BookForm(request.POST)
         if form.is_valid():
@@ -45,6 +46,8 @@ def book_add(request):
         "category_form": CategoryForm(),
     }
     return render(request, "books/book_form.html", context)
+
+
 
 def book_edit(request, pk):
     book = get_object_or_404(Book, pk=pk)
@@ -65,6 +68,8 @@ def book_edit(request, pk):
         "category_form": CategoryForm(),
     }
     return render(request, "books/book_form.html", context)
+
+
 
 def book_delete(request, pk):
     book = get_object_or_404(Book, pk=pk)
@@ -91,7 +96,6 @@ def book_detail(request, pk):
 
 
 def author_add(request):
-
     if request.method == "POST":
         form = AuthorForm(request.POST)
         if form.is_valid():
@@ -106,7 +110,6 @@ def author_add(request):
 
 
 def category_add(request):
-
     if request.method == "POST":
         form = CategoryForm(request.POST)
         if form.is_valid():
@@ -121,7 +124,6 @@ def category_add(request):
 
 
 def publisher_add(request):
-
     if request.method == "POST":
         form = PublisherForm(request.POST)
         if form.is_valid():
@@ -135,7 +137,6 @@ def publisher_add(request):
 
 
 def book_delete_filtered(request):
-
     if request.method == "POST":
         books, _ = filter_books(request.GET)
         count = books.count()
@@ -151,7 +152,6 @@ def book_delete_filtered(request):
 
 @login_required
 def favorite_toggle(request, pk):
-
     book = get_object_or_404(Book, pk=pk)
     added = toggle_favorite(request.user, book)
     if added:
@@ -165,7 +165,6 @@ def favorite_toggle(request, pk):
 
 @login_required
 def favorite_list(request):
-
     favorites = (
         Favorite.objects.filter(user=request.user)
         .select_related("book", "book__category")
@@ -173,3 +172,68 @@ def favorite_list(request):
     )
     return render(request, "books/favorites.html", {"favorites": favorites})
 
+
+def author_list(request):
+    context = {
+        "title": "مدیریت نویسندگان",
+        "items": list_authors(),
+        "add_url_name": "books:author_add",
+        "delete_url_name": "books:author_delete",
+        "is_protected": True,
+        "empty_text": "هنوز نویسنده‌ای ثبت نشده است.",
+    }
+    return render(request, "books/lookup_list.html", context)
+
+
+def author_delete(request, pk):
+    author = get_object_or_404(Author, pk=pk)
+    if request.method == "POST":
+        ok, error = delete_author(author)
+        if ok:
+            messages.success(request, f'نویسنده «{author.name}» حذف شد.')
+        else:
+            messages.error(request, error)
+    return redirect("books:author_list")
+
+
+def publisher_list(request):
+    context = {
+        "title": "مدیریت ناشران",
+        "items": list_publishers(),
+        "add_url_name": "books:publisher_add",
+        "delete_url_name": "books:publisher_delete",
+        "is_protected": True,
+        "empty_text": "هنوز ناشری ثبت نشده است.",
+    }
+    return render(request, "books/lookup_list.html", context)
+
+
+def publisher_delete(request, pk):
+    publisher = get_object_or_404(Publisher, pk=pk)
+    if request.method == "POST":
+        ok, error = delete_publisher(publisher)
+        if ok:
+            messages.success(request, f'ناشر «{publisher.name}» حذف شد.')
+        else:
+            messages.error(request, error)
+    return redirect("books:publisher_list")
+
+
+def category_list(request):
+    context = {
+        "title": "مدیریت دسته‌بندی‌ها",
+        "items": list_categories(),
+        "add_url_name": "books:category_add",
+        "delete_url_name": "books:category_delete",
+        "is_protected": False,
+        "empty_text": "هنوز دسته‌بندی‌ای ثبت نشده است.",
+    }
+    return render(request, "books/lookup_list.html", context)
+
+
+def category_delete(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == "POST":
+        delete_category(category)
+        messages.success(request, f'دسته‌بندی «{category.name}» حذف شد.')
+    return redirect("books:category_list")
