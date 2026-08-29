@@ -12,7 +12,7 @@ from .selectors import filter_books
 def book_list(request):
     books, form = filter_books(request.GET)
 
-    paginator = Paginator(books, 10)
+    paginator = Paginator(books, 12)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 

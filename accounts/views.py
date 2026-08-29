@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth import login
-from books.forms import RegisterForm
+from accounts.forms import RegisterForm
 
 
 def register(request):

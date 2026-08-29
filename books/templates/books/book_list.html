@@ -1,10 +1,156 @@
-{{ form.q.label_tag }}
-{{ form.q }}
+{% extends "base.html" %}
+{% block title %}لیست کتاب‌ها{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h3 class="mb-0">لیست کتاب‌ها <span class="badge bg-secondary">{{ total_count }}</span></h3>
+    <a href="{% url 'books:book_add' %}" class="btn btn-primary">+ افزودن کتاب جدید</a>
+</div>
+
+<div class="card filter-card p-3 mb-4">
+    <form method="get" class="row g-3" id="filterForm">
+        <div class="col-md-3">
+            {{ form.q.label_tag }}
+            {{ form.q }}
+        </div>
+        <div class="col-md-2">
+            {{ form.author.label_tag }}
+            {{ form.author }}
+        </div>
+        <div class="col-md-2">
+            {{ form.publisher.label_tag }}
+            {{ form.publisher }}
+        </div>
+        <div class="col-md-2">
+            {{ form.category.label_tag }}
+            {{ form.category }}
+        </div>
+        <div class="col-md-2">
+            {{ form.language.label_tag }}
+            {{ form.language }}
+        </div>
+        <div class="col-md-2">
+            {{ form.min_price.label_tag }}
+            {{ form.min_price }}
+        </div>
+        <div class="col-md-2">
+            {{ form.max_price.label_tag }}
+            {{ form.max_price }}
+        </div>
+        <div class="col-md-2">
+            {{ form.date_from.label_tag }}
+            {{ form.date_from }}
+        </div>
+        <div class="col-md-2">
+            {{ form.date_to.label_tag }}
+            {{ form.date_to }}
+        </div>
+        <div class="col-md-2">
+            {{ form.sort.label_tag }}
+            {{ form.sort }}
+        </div>
+        <div class="col-12 d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-outline-primary">اعمال فیلتر / جستجو</button>
+            <a href="{% url 'books:book_list' %}" class="btn btn-outline-secondary">بازنشانی فیلترها</a>
+
+            {% if total_count > 0 %}
+            <button type="button" class="btn btn-outline-danger ms-auto"
+                    data-bs-toggle="modal">
+                 حذف این {{ total_count }} کتاب از کتابخانه
+            </button>
+            {% endif %}
+        </div>
+    </form>
+
+</div>
+
+{% if page_obj %}
+<div class="catalog-grid">
+    {% for book in page_obj %}
+        <article class="catalog-card {% cycle 'spine-1' 'spine-2' 'spine-3' 'spine-4' 'spine-5' %}">
+            <h3 class="catalog-title">
+                <a href="{% url 'books:book_detail' book.pk %}">{{ book.title }}</a>
+            </h3>
+            <div class="catalog-meta">
+                {{ book.author }} — ناشر: {{ book.publisher }}
+            </div>
+            <div class="catalog-tags">
+                {% if book.category %}
+                    <span class="badge bg-info text-dark">{{ book.category.name }}</span>
+                {% endif %}
+                <span class="badge bg-light text-dark border">{{ book.get_language_display }}</span>
+            </div>
+            <hr class="catalog-rule">
+            <div class="catalog-foot">
+                <span class="badge bg-success">{{ book.price }} تومان</span>
+                <span>{{ book.publish_date|date:"Y/m/d" }}</span>
+            </div>
+            <div class="catalog-actions">
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'books:favorite_toggle' book.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button type="submit"
+                            class="favorite-btn {% if book.pk in favorite_ids %}is-active{% endif %}"
+                            title="{% if book.pk in favorite_ids %}حذف از علاقه‌مندی{% else %}افزودن به علاقه‌مندی{% endif %}"
+                            aria-label="افزودن یا حذف از علاقه‌مندی">
+                        <svg viewBox="0 0 24 24" width="18" height="18"
+                             fill="{% if book.pk in favorite_ids %}currentColor{% else %}none{% endif %}"
+                             stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                            <path d="M12 20.5s-7.3-4.6-10-9C0.3 8.2 1.1 4.4 4.4 3.1c2.3-0.9 4.7 0 6 2 0.6 0.9 0.9 1.4 1.6 1.4s1-0.5 1.6-1.4c1.3-2 3.7-2.9 6-2 3.3 1.3 4.1 5.1 2.4 8.4-2.7 4.4-10 9-10 9z"/>
+                        </svg>
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{% url 'books:book_edit' book.pk %}" class="btn btn-sm btn-outline-warning">ویرایش</a>
+                <a href="{% url 'books:book_delete' book.pk %}" class="btn btn-sm btn-outline-danger">حذف</a>
+            </div>
+        </article>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav>
+    <ul class="pagination justify-content-center mt-4">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">قبلی</a>
+            </li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">صفحه {{ page_obj.number }} از {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{{ querystring }}&page={{ page_obj.next_page_number }}">بعدی</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="alert alert-warning text-center">هیچ کتابی مطابق با جستجو/فیلتر شما یافت نشد.</div>
+{% endif %}
 
 
+<div class="modal fade" id="deleteFilteredModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'books:book_delete_filtered' %}?{{ querystring }}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">تایید حذف گروهی</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    آیا مطمئن هستید می‌خواهید تمام <strong>{{ total_count }}</strong> کتابی که با فیلتر فعلی نمایش داده شده‌اند حذف شوند؟ این عمل غیرقابل بازگشت است.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-danger">بله، حذف شود</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-{{ form.author.label_tag }}
-{{ form.author }}
-
-{{ form.publisher.label_tag }}
-{{ form.publisher }}
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap">
+        <div>
+            <h3>{{ book.title }}</h3>
+            <p class="text-muted mb-1">نویسنده: <strong>{{ book.author }}</strong></p>
+            <p class="text-muted mb-1">ناشر: <strong>{{ book.publisher }}</strong></p>
+            {% if book.category %}
+                <span class="badge bg-info text-dark mb-2">{{ book.category.name }}</span>
+            {% endif %}
+            <span class="badge bg-light text-dark border mb-2">{{ book.get_language_display }}</span>
+            <p class="mb-1">قیمت: <span class="badge bg-success">{{ book.price }} تومان</span></p>
+            <p class="mb-1">تاریخ انتشار: {{ book.publish_date|date:"Y/m/d" }}</p>
+            {% if book.isbn %}
+                <p class="mb-1">شابک (ISBN): <code>{{ book.isbn }}</code></p>
+            {% endif %}
+            {% if book.description %}
+                <p class="mt-3">{{ book.description|linebreaks }}</p>
+            {% endif %}
+        </div>
+        <div class="d-flex flex-column gap-2">
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'books:favorite_toggle' book.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button type="submit" class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1">
+                    <svg viewBox="0 0 24 24" width="15" height="15"
+                         fill="{% if is_favorite %}currentColor{% else %}none{% endif %}"
+                         stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                        <path d="M12 20.5s-7.3-4.6-10-9C0.3 8.2 1.1 4.4 4.4 3.1c2.3-0.9 4.7 0 6 2 0.6 0.9 0.9 1.4 1.6 1.4s1-0.5 1.6-1.4c1.3-2 3.7-2.9 6-2 3.3 1.3 4.1 5.1 2.4 8.4-2.7 4.4-10 9-10 9z"/>
+                    </svg>
+                    {% if is_favorite %}حذف از علاقه‌مندی‌ها{% else %}افزودن به علاقه‌مندی‌ها{% endif %}
+                </button>
+            </form>
+            {% endif %}
+            <a href="{% url 'books:book_edit' book.pk %}" class="btn btn-outline-warning btn-sm">ویرایش</a>
+            <a href="{% url 'books:book_delete' book.pk %}" class="btn btn-outline-danger btn-sm">حذف</a>
+        </div>
+    </div>
+</div>
+
+{% if other_books_by_author %}
+<h5>سایر کتاب‌های {{ book.author }}</h5>
+<ul class="list-group mb-4">
+    {% for b in other_books_by_author %}
+        <li class="list-group-item d-flex justify-content-between">
+            <a href="{% url 'books:book_detail' b.pk %}">{{ b.title }}</a>
+            <span class="text-muted">{{ b.publish_date|date:"Y/m/d" }}</span>
+        </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<a href="{% url 'books:book_list' %}" class="btn btn-outline-secondary">بازگشت به لیست</a>
+{% endblock %}
