@@ -4,9 +4,9 @@ from books import views
 urlpatterns = [
     path('', views.book_list, name='book_list'),
     path('add/', views.book_add, name='book_add'),
-    path('edit/<int:book_id>/', views.book_edit, name='book_edit'),
-    path('delete/<int:book_id>/', views.book_delete, name='book_delete'),
-    path('detail/<int:book_id>/', views.book_detail, name='book_detail'),
+    path('edit/<int:pk>/', views.book_edit, name='book_edit'),
+    path('delete/<int:pk>/', views.book_delete, name='book_delete'),
+    path('detail/<int:pk>/', views.book_detail, name='book_detail'),
     path('author/add/', views.author_add, name='author_add'),
     path('category/add/', views.category_add, name='category_add'),
     path('publisher/add/', views.publisher_add, name='publisher_add'),
