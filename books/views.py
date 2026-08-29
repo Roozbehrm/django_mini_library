@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import JsonResponse, request
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from books.forms import AuthorForm, BookForm, CategoryForm, PublisherForm
@@ -8,6 +9,9 @@ from books.models import Book, Favorite
 from books.selectors import filter_books, list_authors, list_categories, list_publishers
 from books.services import delete_author, delete_category, delete_publisher, toggle_favorite
 
+
+def _is_ajax(request):
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
 
 def book_list(request):
     books, form = filter_books(request.GET)
@@ -100,8 +104,12 @@ def author_add(request):
         form = AuthorForm(request.POST)
         if form.is_valid():
             author = form.save()
+            if _is_ajax(request):
+                return JsonResponse({"id": author.pk, "name": str(author)})
             messages.success(request, f'نویسنده «{author.name}» اضافه شد.')
             return redirect("books:book_add")
+        if _is_ajax(request):
+            return JsonResponse({"errors": form.errors}, status=400)
     else:
         form = AuthorForm()
 
@@ -114,8 +122,12 @@ def category_add(request):
         form = CategoryForm(request.POST)
         if form.is_valid():
             category = form.save()
+            if _is_ajax(request):
+                return JsonResponse({"id": category.pk, "name": str(category)})
             messages.success(request, f'دسته‌بندی «{category.name}» اضافه شد.')
             return redirect("books:book_add")
+        if _is_ajax(request):
+            return JsonResponse({"errors": form.errors}, status=400)
 
     else:
         form = CategoryForm()
@@ -128,8 +140,12 @@ def publisher_add(request):
         form = PublisherForm(request.POST)
         if form.is_valid():
             publisher = form.save()
+            if _is_ajax(request):
+                return JsonResponse({"id": publisher.pk, "name": str(publisher)})
             messages.success(request, f'ناشر «{publisher.name}» اضافه شد.')
             return redirect("books:book_add")
+        if _is_ajax(request):
+            return JsonResponse({"errors": form.errors}, status=400)
     else:
         form = PublisherForm()
     return render(request, "books/simple_form.html", {"form": form, "title": "افزودن ناشر جدید"})

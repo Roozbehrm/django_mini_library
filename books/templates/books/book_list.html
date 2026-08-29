@@ -53,15 +53,14 @@
             <button type="submit" class="btn btn-outline-primary">اعمال فیلتر / جستجو</button>
             <a href="{% url 'books:book_list' %}" class="btn btn-outline-secondary">بازنشانی فیلترها</a>
 
-            {% if total_count > 0 %}
+            {% if querystring and total_count > 0 %}
             <button type="button" class="btn btn-outline-danger ms-auto"
-                    data-bs-toggle="modal">
-                 حذف این {{ total_count }} کتاب از کتابخانه
+                    data-bs-toggle="modal" data-bs-target="#deleteFilteredModal">
+                🗑 حذف این {{ total_count }} کتاب از کتابخانه
             </button>
             {% endif %}
         </div>
     </form>
-
 </div>
 
 {% if page_obj %}
@@ -131,7 +130,6 @@
 <div class="alert alert-warning text-center">هیچ کتابی مطابق با جستجو/فیلتر شما یافت نشد.</div>
 {% endif %}
 
-
 <div class="modal fade" id="deleteFilteredModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -152,5 +150,34 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const filterForm = document.getElementById('filterForm');
+    if (!filterForm) return;
 
+    let debounceTimer;
+    const DEBOUNCE_DELAY = 600; 
+
+    function submitFilterForm() {
+        if (filterForm.requestSubmit) {
+            filterForm.requestSubmit();
+        } else {
+            filterForm.submit();
+        }
+    }
+
+
+    filterForm.querySelectorAll('select').forEach(function (el) {
+        el.addEventListener('change', submitFilterForm);
+    });
+
+
+    filterForm.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]').forEach(function (el) {
+        el.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(submitFilterForm, DEBOUNCE_DELAY);
+        });
+    });
+});
+</script>
 {% endblock %}
