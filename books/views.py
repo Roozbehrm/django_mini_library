@@ -20,12 +20,19 @@ def book_list(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
+    favorite_ids = set()
+    if request.user.is_authenticated:
+        favorite_ids = set(
+            Favorite.objects.filter(user=request.user).values_list("book_id", flat=True)
+        )
+
     querystring = request.GET.copy()
     querystring.pop("page", None)
 
     context = {
         "page_obj": page_obj,
         "form": form,
+        "favorite_ids": favorite_ids,
         "querystring": querystring.urlencode(),
         "total_count": books.count(),
     }
@@ -184,7 +191,7 @@ def favorite_list(request):
     favorites = (
         Favorite.objects.filter(user=request.user)
         .select_related("book", "book__category")
-        .order_by("-added_at")
+        .order_by("-created_at")
     )
     return render(request, "books/favorites.html", {"favorites": favorites})
 

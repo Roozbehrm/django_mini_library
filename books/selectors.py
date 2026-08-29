@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q , Count
 from books.forms import BookFilterForm
 from books.models import Book, Author, Publisher, Category
 

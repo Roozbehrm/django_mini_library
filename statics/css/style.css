@@ -181,7 +181,6 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 999px;
 }
 
-
 .card {
     border: none !important;
     border-radius: var(--radius-md) !important;
@@ -352,6 +351,7 @@ h1, h2, h3, h4, h5, h6 {
     background: #f8ecec;
 }
 
+
 .form-label {
     font-size: 0.83rem;
     color: var(--ink-soft);
@@ -381,6 +381,7 @@ form input[type="text"]:focus, form input[type="password"]:focus, form input[typ
 .table thead { background-color: var(--emerald); color: #fff; }
 .table { --bs-table-bg: var(--surface); }
 
+
 .pagination .page-link {
     border-radius: var(--radius-sm) !important;
     color: var(--emerald);
@@ -389,6 +390,7 @@ form input[type="text"]:focus, form input[type="password"]:focus, form input[typ
 }
 
 .pagination .page-item.disabled .page-link { background: transparent; color: var(--ink-soft); }
+
 
 .choices { font-family: var(--font-body); margin-bottom: 0; }
 
@@ -428,6 +430,7 @@ form input[type="text"]:focus, form input[type="password"]:focus, form input[typ
 }
 
 .choices__item--selectable.is-highlighted { background-color: var(--ivory); }
+
 
 .spine-1 { --spine-color: var(--spine-1); }
 .spine-2 { --spine-color: var(--spine-2); }

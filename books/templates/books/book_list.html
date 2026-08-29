@@ -61,6 +61,11 @@
             {% endif %}
         </div>
     </form>
+    {% if querystring and total_count > 0 %}
+        <p class="text-muted small mb-0 mt-2">
+            توجه: دکمه‌ی «بازنشانی فیلترها» فقط جستجو را پاک می‌کند، ولی دکمه‌ی قرمز، خودِ کتاب‌ها را برای همیشه از دیتابیس حذف می‌کند.
+        </p>
+    {% endif %}
 </div>
 
 {% if page_obj %}
@@ -130,6 +135,7 @@
 <div class="alert alert-warning text-center">هیچ کتابی مطابق با جستجو/فیلتر شما یافت نشد.</div>
 {% endif %}
 
+<!-- مودال تایید حذف گروهی -->
 <div class="modal fade" id="deleteFilteredModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -150,13 +156,14 @@
         </div>
     </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const filterForm = document.getElementById('filterForm');
     if (!filterForm) return;
 
     let debounceTimer;
-    const DEBOUNCE_DELAY = 600; 
+    const DEBOUNCE_DELAY = 600;
 
     function submitFilterForm() {
         if (filterForm.requestSubmit) {
@@ -171,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
         el.addEventListener('change', submitFilterForm);
     });
 
-
+  
     filterForm.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]').forEach(function (el) {
         el.addEventListener('input', function () {
             clearTimeout(debounceTimer);
